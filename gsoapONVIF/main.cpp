@@ -5,6 +5,7 @@
 #include "plugin/wsaapi.h"
 #include  <openssl/rsa.h>
 #include  "ErrorLog.h"
+#include "soapStub.h" // added to try to send messages + changes of the Makefile
  
 #include "include/soapDeviceBindingProxy.h"
 #include "include/soapMediaBindingProxy.h"
@@ -15,9 +16,19 @@
 
 using namespace std;
 
+#define MAX_DEVICE 20 //ajout
 #define DEV_PASSWORD "846843"
 #define MAX_HOSTNAME_LEN 128
 #define MAX_LOGMSG_LEN 256 
+
+
+typedef struct device {
+	char *device_uuid;
+	char *device_server_adress;
+	char *username;
+	char *password;	
+}
+
 
 
 void PrintErr(struct soap* _psoap)
@@ -62,58 +73,87 @@ int main(int argc, char* argv[])
 
 	soap_register_plugin(proxyEvent.soap, soap_wsa);
 
-	struct soap *soap = soap_new();
+	//struct soap *soap = soap_new();
 
 	// AJOUTS
-
-	wsdd__ProbeType ProbeType;
-	struct __wsdd__ProbeMatches ProbeMatches;
+	
+	
+	struct soap *soap;
+	struct wsdd__ProbeType req; //used to send
+	struct wsdd__ProbeType wsdd__Probe;
+	struct __wsdd__ProbeMatches resp;
+	struct wsdd__ScopesType sScope;
+	struct SOAP_ENV__Header header;
+	
 	int count = 0; //compteur de ProbeMatches
-
-	cout << "Trying to do send a WS-Discovery Probe message\n";
-	sended = soap_send___wsdd__Probe(soap, "soap.udp://239.255.255.250:3702", NULL, &ProbeType);
-	cout << "Sended with sucess (no check of errors)\n";
-
-	if (sended != SOAP_OK)
-	{
-		cout << "soap error :", soap->error, *soap_faultcode(soap), *soap_faultstring(soap);
-
+	int result = 0;
+	unsigned char MACaddr[6];
+	char _HwId[1024];
+	unsigned int Flagrand;
+	
+	soap = soap_new();
+	if(soap == NULL){
+		cout << "Error in creating new soap structure\n";
 	}
 	
-	else {
-		cout << "Begin receive ProbeMatches ...\n";
-		cout << "Nombre de ProbesMates : ", count;
-
-		received = soap_recv___wsdd__ProbeMatches(soap, ProbeMatches);
-
-		cout << "\nsoap_recv___wsdd__ProbeMatches result : ", received;
-
-		if (received != SOAP_OK)
-		{
-			cout << "\nFounded devices :", count;
-			break;
-		}
-		
-		else {
-			if (ProbeMatches.wsdd__ProbeMatches) {
-				cout << "\nSize ProbeMatches : ", ProbeMatches.wsdd__ProbeMatches->__sizeProbeMatch;
-				cout << "\nTarget EP Adress : ", ProbeMatches.wsdd__ProbeMatches->ProbeMatch->wsa__EndpointReference.Address;
-				cout << "\nTarget Type : ", ProbeMatches.wsdd__ProbeMatches->ProbeMatch->Types;
-				cout << "\nTarget Service Adress : ", ProbeMatches.wsdd__ProbeMatches.ProbeMatch.XAddrs;
-				cout << "\nTarget Metadata Version : ", ProbeMatches.wsdd__ProbeMathes.ProbeMatch.MetadataVersion;
-				cout << "\nTarget Scopes Adresses : ", ProbeMatches.wsdd__ProbeMatches->ProbeMatch->Scopes->__item;
-
-				
-			}
-
-		}
-		
-
+	soap_set_namespaces(soap, namespaces);
+	soap->recv_timeout = 5;
+	soap_default_SOAP_ENV__Header(soap, &header);
+	header.wsa__MessageID = _HwId;
+	header.wsa__To = "urn:schemas-xmlsoap-org:ws:2005:04:discovery";
+	header.wsa__Action = "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe";
+	soap->header = &header;
+	
+	soap_default_wsdd__ScopesType(soap, &sScope);
+	sScope.__item = "";
+	
+	soap_default_wsdd__ProbeType(soap, &req);
+	req.Scopes = &sScope;
+	
+	req.Types = "tds:Device";
+	
+	
+	result = soap_send___wsdd__Probe(soap, "soap.udp://239.255.255.250:3702", NULL, &req);
+	
+	if(result != 0)
+	{
+		cout << "Error in sending probe message ! \n";
 	}
-
-
-
+	
+	else{
+	
+		cout << "Sended with sucess !! \n";
+		
+		cout << "Starting to receive ProbeMatches\n";
+		cout << "Nombre de ProbesMates : " << count;
+		
+		result = soap_recv___wsdd__ProbeMatches(soap, &resp);
+		if(result != 0)
+		{
+			cout << "Error in receiving probe message ! \n";
+		}
+		
+		else
+		{
+			if(resp.wsdd__ProbeMatches)
+			{
+				cout << "\nSize ProbeMatches : " << resp.wsdd__ProbeMatches->__sizeProbeMatch;
+				cout << "\nTarget EP Adress : " << resp.wsdd__ProbeMatches->ProbeMatch->wsa__EndpointReference.Address;
+				cout << "\nTarget Type : " << resp.wsdd__ProbeMatches->ProbeMatch->Types;
+				cout << "\nTarget Service Adress : " << resp.wsdd__ProbeMatches->ProbeMatch->XAddrs;
+				//cout << "\nTarget Metadata Version : " << resp.wsdd__ProbeMathes->ProbeMatch->MetadataVersion;
+				cout << "\nTarget Scopes Adresses : " << resp.wsdd__ProbeMatches->ProbeMatch->Scopes->__item;
+			}
+			
+			
+		}
+		
+	
+	}
+	
 	// FIN AJOUT
+	
+	
 	if (SOAP_OK != soap_wsse_add_UsernameTokenDigest(proxyDevice.soap, NULL, "admin", DEV_PASSWORD))
 	{
 		return -1;
