@@ -1,0 +1,109 @@
+This document aims to explain in one or two sentences the content of each lib or source code present in the gSOAP folder.
+We will only focus on libs and source code that we would eventualy have in the folder of our main program.
+
+This document is subject to update.
+
+**************************************************
+WRITTEN BY : Nadir GHENNAM for OTODO SAS
+**************************************************
+
+
+*****************
+~gsoap-2.8/gsoap
+*****************
+
+- dom.c and dom.cpp  
+(DOM = Document Object Model)
+Occasionally we will need to work with raw XML data. Raw XML can be parsed with a DOM parser and stored in a DOM node graph. 
+The DOM (Document Object Model) node graph (actually a node tree) can be inspected to retrieve text and other values. 
+We can iteratively and recursively traverse the XML tree via its DOM node graph at increasingly deeper levels to inspect and retrieve values of XML elements and attributes.
+
+- stdsoap2.cpp .c or.h
+Main code of the executable soapcpp2.
+
+**********************
+~gsoap-2.8/gsoap/wsdl
+**********************
+The whole fodler is dedicated to wsld2h
+
+
+************************
+~gsoap-2.8/gsoap/import
+************************
+
+- mecevp.c (should be rename .cpp in a C++ application) 
+Code for encryption and decryption of messages using the EVP interface of OpenSSL 
+
+- smdevp.c (should be rename .cpp in a C++ application)
+Computes signed/unsigned message digests over any type of data using the EVP interface of OpenSSL.
+
+- thread.c (should be rename .cpp in a C++ application)
+code for portable threads and locks API implementation
+
+- wsaapi.c (should be rename .cpp in a C++ application)
+WS-Addressing plugin.
+
+- wsseapi.cpp 
+WS-Security plugin
+
+****************************************
+Generated code with wsdl2h and soapcpp2
+****************************************
+
+- onvif.h
+Header file created from wsdl2h using ONVIF APIs. Contains definitions of namespaces, classes, functions from APIs
+
+
+Depending on what API you called to create onvif.h you may not have all the following source code generated from soapcpp2
+
+- soapAdvancedSecurityServiceBindingProxy.cpp
+
+
+- soapC.cpp
+Code for Client side contain functions used for the client.
+
+- soapDeviceBindingProxy.cpp
+Contains functions to know more about the service pointed.
+
+- soapDeviceIOBindingProxy.cpp
+Contains functions to controle I/O about the service pointed.
+
+- soapH.h
+Header file of SoapC.cpp
+
+
+- soapImagingBindingProxy.cpp
+All about getting images, setting up etc...
+
+
+- soapMediaBindingProxy.cpp
+Streaming lib
+
+- soapPTZBindingProxy.cpp
+Code for PTZ (Pan Tilt Zoom)
+
+- soapPullPointSubscriptionBindingProxy.cpp
+I am not sure but it may be about messaging 
+
+- soapRemoteDiscoveryBindingProxy.cpp
+WS-Discovery
+
+- soapStub.h
+Definitions of classes and functions
+
+- soapwsddProxy.cpp
+Also WS-Discovery (???)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
