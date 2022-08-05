@@ -4,7 +4,7 @@ Also we recommand you to read LIBS.txt if you want to understand what are the gl
 Any information included in this document has to be considered as understood by it writter. 
 
 This document doen't focus on the development of the main application and problems linked to it.
-(Onvif Device Manager doesn't do a Discovery you must put an IP first)
+
 **************************************************
 WRITTEN BY : Nadir GHENNAM for OTODO SAS
 **************************************************
